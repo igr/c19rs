@@ -5,7 +5,7 @@ Primer moguće analize i predikcije širenja virusa na osnovu dostupnih podataka
 > NAPOMENA: OVA ANALIZA JE ISKLJUČIVO **PRIMER** ŠTA SE MOŽE RADITI SA PODACIMA.
 > ANALIZA JE URAĐENA OD **NESTRUČNOG** LICA I NE TREBA JE UZIMATI ZA OZBILJNO. 
 
-Datum: **2020-03-21**
+Datum: **2020-03-22 8:00**
 
 Predikcija:
 
