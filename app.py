@@ -74,6 +74,8 @@ savefig('death-10')
 # kalman filter
 class Filter:
     def __init__(self, x0):
+        dt = 1.0  # time step
+
         self.kf = KalmanFilter(dim_x=2, dim_z=1)
 
         # Initial state estimate
@@ -81,38 +83,36 @@ class Filter:
 
         # Initial Covariance matrix
         # An uncertainty must be given for the initial state.
-        self.kf.P = np.eye(2) * 10 ** 2
+        self.kf.P = np.eye(2) * 1000.
 
         # State transition function
         self.kf.F = np.array([
-            [1., 1.],
+            [1., dt],
             [0., 1.]
         ])
 
         # Process noise
-        self.kf.Q = Q_discrete_white_noise(dim=2, dt=1, var=1)
+        self.kf.Q = Q_discrete_white_noise(dim=2, dt=dt, var=1)
 
         # Measurement noise
         # This measurement uncertainty indicates
         # how much one trusts the measured values ​​of the sensors.
         # If the sensor is very accurate, small values ​​should be used here.
         # If the sensor is relatively inaccurate, large values ​​should be used here.
-        self.kf.R = np.array([[0.1]])
+        self.kf.R = np.array([[.1]])
 
         # Measurement function
         # The filter must also be told what is measured
         # and how it relates to the state vector
         self.kf.H = np.array([[1., 0.]])
 
-    def run(self, z):
+    def update(self, z):
         self.kf.predict()
         self.kf.update(z)
+        return int(self.kf.x_prior[0])
 
-    def next(self):
+    def predict(self):
         self.kf.predict()
-        return self.kf.x[0]
-
-    def predicted(self):
         return int(self.kf.x[0])
 
 
@@ -130,21 +130,29 @@ def create_prediction(ts, region):
     index = 0
     last_date = r.at[index, 'date']
     for val in m[region].tolist():
+        next_val = 0
         if val > 0:
-            f.run(val)
-        next_val = f.predicted()
+            next_val = f.update(val)
         r.at[index, 'p'] = next_val
 
         last_date = r.at[index, 'date']
         index += 1
 
     # prediction for the next day
-    next_val = int(f.next())
+    next_val = f.predict()
     r.at[index, 'p'] = next_val
     r.at[index, 'date'] = last_date + pd.DateOffset(1)
 
     print('Predictions')
     print(r.at[index, 'date'])
+    print(next_val)
+
+    while next_val < 1000:
+        next_val = f.predict()
+        last_date = last_date + pd.DateOffset(1)
+
+    print('\nHit 1k')
+    print(last_date)
     print(next_val)
 
     # prepare data frame for plotting and reindex
